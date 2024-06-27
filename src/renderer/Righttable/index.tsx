@@ -22,7 +22,7 @@ const RightTable: React.FC<RightTableProps> = ({
   return (
     <div className="p-4 border-l">
       {selectedCards.map((card) => (
-        <div className="p-4 border h-36 my-4 rounded-lg shadow flex justify-between items-center">
+        <div className="p-4 border h-36 my-4 bg-white rounded-lg shadow flex justify-between items-center">
           <div>
             <h3 className="font-bold">{card.sensor_name}</h3>
             <p>{card.sensor_type}</p>

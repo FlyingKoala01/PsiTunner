@@ -5,6 +5,7 @@ import RightTable from '../Righttable';
 import DragPreview from '../Dragpreview';
 import useDragPosition from '../../main/useDragPosition';
 import { initialCards } from '../../main/cards';
+import logo from '../../../assets/icons/js-logo.png';
 
 const HomePage: React.FC = () => {
   const [cards, setCards] = useState<CardType[]>(initialCards);
@@ -53,37 +54,47 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen relative">
-      <div className="w-1/3 overflow-y-auto">
-        <LeftTable
-          cards={cards}
-          onCardSelect={handleCardSelect}
-          onDragStart={handleDragStart}
-        />
-      </div>
+    <div className="flex flex-col h-screen relative">
       <div
-        className="w-2/3 relative"
-        onDrop={handleDrop}
-        onDragOver={handleDragOverRight}
-        onDragLeave={handleDragLeaveRight}
-      >
-        <RightTable
-          selectedCards={selectedCards}
-          onCardRemove={handleCardRemove}
-        />
-        {isOverRightColumn && (
-          <div
-            className="absolute left-0 right-0"
-            style={{
-              top: `${selectedCards.length * 10}rem`,
-              height: '10rem',
-              padding: '1rem',
-              margin: '1rem 0',
-            }}
-          >
-            <div className="w-full h-full bg-black bg-opacity-25 rounded"></div>
-          </div>
-        )}
+        className="absolute inset-0 bg-no-repeat bg-center opacity-10 pointer-events-none"
+        style={{
+          backgroundImage: `url(${logo})`,
+          backgroundSize: '20%',
+          backgroundPosition: 'center',
+        }}
+      ></div>
+      <div className="flex flex-grow overflow-hidden">
+        <div className="w-1/3 overflow-y-auto h-full">
+          <LeftTable
+            cards={cards}
+            onCardSelect={handleCardSelect}
+            onDragStart={handleDragStart}
+          />
+        </div>
+        <div
+          className="w-2/3 relative overflow-y-auto h-full"
+          onDrop={handleDrop}
+          onDragOver={handleDragOverRight}
+          onDragLeave={handleDragLeaveRight}
+        >
+          <RightTable
+            selectedCards={selectedCards}
+            onCardRemove={handleCardRemove}
+          />
+          {isOverRightColumn && (
+            <div
+              className="absolute left-0 right-0"
+              style={{
+                top: `${selectedCards.length * 10}rem`,
+                height: '10rem',
+                padding: '1rem',
+                margin: '1rem 0',
+              }}
+            >
+              <div className="w-full h-full bg-black bg-opacity-25 rounded"></div>
+            </div>
+          )}
+        </div>
       </div>
       {draggingCard && (
         <DragPreview card={draggingCard} position={dragPosition} />
