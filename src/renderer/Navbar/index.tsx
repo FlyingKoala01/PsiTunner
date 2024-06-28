@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import icon from '../../../assets/icons/js-logo-long.png';
+import SerialStatus from '../SerialStatus';
 
 const Navbar: React.FC = () => {
   return (
@@ -36,6 +37,14 @@ const Navbar: React.FC = () => {
               </Link>
             </li>
             <li>
+              <Link
+                to="/settings"
+                className="block py-2 px-3 md:p-0 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700"
+              >
+                Settings
+              </Link>
+            </li>
+            <li>
               <a
                 href="#"
                 className="block py-2 px-3 md:p-0 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700"
@@ -43,6 +52,7 @@ const Navbar: React.FC = () => {
                 Support
               </a>
             </li>
+            <SerialStatus />
           </ul>
         </div>
       </div>
