@@ -1,9 +1,16 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import icon from '../../../assets/icons/js-logo-long.png';
 import SerialStatus from '../SerialStatus';
 
 const Navbar: React.FC = () => {
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.pathname);
+
+  const handleTabClick = (path: string) => {
+    setActiveTab(path);
+  };
+
   return (
     <nav className="bg-gray-200">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
@@ -22,8 +29,11 @@ const Navbar: React.FC = () => {
             <li>
               <Link
                 to="/"
-                className="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 md:dark:text-blue-500"
-                aria-current="page"
+                className={`block py-2 px-3 rounded md:p-0 ${
+                  activeTab === '/' ? 'text-white bg-blue-700 md:bg-transparent md:text-blue-700' : 'text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700'
+                }`}
+                aria-current={activeTab === '/' ? 'page' : undefined}
+                onClick={() => handleTabClick('/')}
               >
                 Home
               </Link>
@@ -31,7 +41,11 @@ const Navbar: React.FC = () => {
             <li>
               <Link
                 to="/documentation"
-                className="block py-2 px-3 md:p-0 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700"
+                className={`block py-2 px-3 rounded md:p-0 ${
+                  activeTab === '/documentation' ? 'text-white bg-blue-700 md:bg-transparent md:text-blue-700' : 'text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700'
+                }`}
+                aria-current={activeTab === '/' ? 'page' : undefined}
+                onClick={() => handleTabClick('/documentation')}
               >
                 Documentation
               </Link>
@@ -39,7 +53,11 @@ const Navbar: React.FC = () => {
             <li>
               <Link
                 to="/settings"
-                className="block py-2 px-3 md:p-0 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700"
+                className={`block py-2 px-3 rounded md:p-0 ${
+                  activeTab === '/settings' ? 'text-white bg-blue-700 md:bg-transparent md:text-blue-700' : 'text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700'
+                }`}
+                aria-current={activeTab === '/' ? 'page' : undefined}
+                onClick={() => handleTabClick('/settings')}
               >
                 Settings
               </Link>
@@ -47,7 +65,11 @@ const Navbar: React.FC = () => {
             <li>
               <a
                 href="#"
-                className="block py-2 px-3 md:p-0 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700"
+                className={`block py-2 px-3 rounded md:p-0 ${
+                  activeTab === '/support' ? 'text-white bg-blue-700 md:bg-transparent md:text-blue-700' : 'text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700'
+                }`}
+                aria-current={activeTab === '/' ? 'page' : undefined}
+                onClick={() => handleTabClick('/support')}
               >
                 Support
               </a>
@@ -61,3 +83,4 @@ const Navbar: React.FC = () => {
 };
 
 export default Navbar;
+
