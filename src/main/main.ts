@@ -19,102 +19,93 @@ let mainWindow: BrowserWindow | null = null;
 let port: SerialPort | null = null;
 const configPath = path.join(app.getPath('userData'), 'serialConfig.json');
 
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
-});
-
-ipcMain.on('submit-support-form', async (event, formData) => {
-  const { title, description, evidence } = formData;
-
-  /*
-  let transporter = nodemailer.createTransport({
-    service: 'gmail', // You can use other services
-    auth: {
-      user: 'your-email@gmail.com',
-      pass: 'your-email-password',
-    },
-  });
-
-  let mailOptions = {
-    from: 'your-email@gmail.com',
-    to: 'support-email@example.com',
-    subject: `Support Request: ${title}`,
-    text: description,
-    attachments: evidence
-      ? [
-          {
-            filename: evidence.name,
-            path: evidence.path,
-          },
-        ]
-      : [],
-  };
-
-  try {
-    await transporter.sendMail(mailOptions);
-    event.reply('support-form-submission-response', { success: true });
-  } catch (error) {
-    event.reply('support-form-submission-response', { success: false });
-  }
-    */
-});
-
-ipcMain.on('save-serial-config', (event, config) => {
-  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
-  initializeSerialPort();
-});
-
-ipcMain.on('check-serial-connection', () => {
+const sendConnectionStatus = () => {
   if (port && port.isOpen) {
-    mainWindow?.webContents.send('serial-status', true);
+    mainWindow?.webContents.send('serial-status', port.path);
   } else {
-    mainWindow?.webContents.send('serial-status', false);
+    mainWindow?.webContents.send('serial-status', null);
   }
-});
+};
 
-ipcMain.on('list-serial-ports', async (event) => {
+const filter_paths = (paths : Array<string>) => {
+  let result : Array<string> = [];
+  paths.forEach(path => {
+    if (path.startsWith('/dev/ttyACM') || path.startsWith('/dev/ttyACM') || path.startsWith('COM'))
+    result.push(path);
+  });
+  return result;
+}
+
+const sendSerialStatus = () => {
   try {
-    const ports = await SerialPort.list();
-    console.log('Available serial ports:', ports); // Add this logging
-    event.reply('serial-ports-list', ports);
+    SerialPort.list().then( ports => {
+      let paths = filter_paths(ports.map(port => port.path));
+      //console.log('Available serial ports:', paths);
+      mainWindow?.webContents.send('serial-ports-list', paths);
+    });
   } catch (error) {
     console.error('Error listing serial ports:', error);
-    event.reply('serial-ports-list', []);
+    mainWindow?.webContents.send('serial-ports-list', []);
+  }
+}
+
+const connectToPath = (path:string) => {
+  if (port && port.isOpen) {
+    port.close();
+  }
+
+  port = new SerialPort({
+    path: path,
+    baudRate: 115200
+  });
+
+  port.on('error', (err: Error) => {
+    console.error('SerialPort error:', err);
+  });
+
+  port.on('data', (data: Buffer) => {
+    mainWindow?.webContents.send('serial-data', data);
+  })
+
+  return true;
+}
+
+const loadConfig = () => {
+  if (fs.existsSync(configPath)) {
+    return JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  } else {
+    return {};
+  }
+};
+
+const saveConfig = (config:object) => {
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+  console.log('Saved config.');
+};
+
+ipcMain.on('connectTo', (event, path) => {
+  let config = loadConfig();
+  if(connectToPath(path)) {
+    config.path = path;
+    saveConfig(config);
+  }
+});
+
+ipcMain.on('sendSerial', (event, command) => {
+  if (port && port.isOpen) {
+    port.write(new TextEncoder().encode(command + '\n'));
+  }
+  else {
+    mainWindow?.webContents.send('send-serial-error', command);
   }
 });
 
 const initializeSerialPort = () => {
-  if (fs.existsSync(configPath)) {
-    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-
-    if (port) {
-      port.close();
-    }
-
-    port = new SerialPort({
-      path: config.path,
-      baudRate: config.baudRate,
-      dataBits: config.dataBits,
-      parity: config.parity,
-      stopBits: config.stopBits,
-      autoOpen: true,
-    });
-
-    port.on('open', () => {
-      mainWindow?.webContents.send('serial-status', true);
-    });
-
-    port.on('error', (err: Error) => {
-      console.error('SerialPort error:', err);
-      mainWindow?.webContents.send('serial-status', false);
-    });
-
-    port.on('close', () => {
-      mainWindow?.webContents.send('serial-status', false);
-    });
+  const config = loadConfig();
+  if (config.path) {
+    connectToPath(config.path);
   } else {
+    mainWindow?.webContents.send('serial-status', null);
     console.warn('Serial configuration file not found');
   }
 };
@@ -197,6 +188,8 @@ const createWindow = async () => {
   });
 
   initializeSerialPort();
+  setInterval(sendSerialStatus, 3000);
+  setInterval(sendConnectionStatus, 2000);
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line

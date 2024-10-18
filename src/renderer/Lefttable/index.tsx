@@ -18,6 +18,7 @@ const LeftTable: React.FC<LeftTableProps> = ({
       {cards.map((card) => (
         <Card
           card={card}
+          key={card.sensor_name + Math.random()} // Temporary solution to avoid an ugly warning
           onCardSelect={onCardSelect}
           onDragStart={onDragStart}
         />

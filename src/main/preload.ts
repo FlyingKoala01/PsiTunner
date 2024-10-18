@@ -1,11 +1,12 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
 export type Channels =
-  | 'ipc-example'
+  | 'sendSerial'
+  | 'connectTo'
+  | 'serial-ports-list'
   | 'serial-status'
-  | 'save-serial-config'
-  | 'check-serial-connection'
-  | 'serial-ports-list';
+  | 'serial-data'
+  | 'send-serial-error';
 
 const electronHandler = {
   ipcRenderer: {
