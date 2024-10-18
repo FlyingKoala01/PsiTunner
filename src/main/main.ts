@@ -54,6 +54,8 @@ const connectToPath = (path:string) => {
     port.close();
   }
 
+  if (!path) return true;
+
   port = new SerialPort({
     path: path,
     baudRate: 115200

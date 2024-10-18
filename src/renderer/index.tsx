@@ -1,14 +1,10 @@
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import { ApplicationConfigIface } from './preload';
 
 const container = document.getElementById('root') as HTMLElement;
 const root = createRoot(container);
 root.render(<App />);
-
-interface ApplicationConfigIface {
-  current_serial_device: string | null;
-  available_serial_devices: string[];
-}
 
 export var ApplicationConfig: ApplicationConfigIface = {
   current_serial_device: null,
