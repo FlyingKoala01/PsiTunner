@@ -5,6 +5,7 @@ declare global {
     electron: ElectronHandler;
     ApplicationConfig: ApplicationConfigIface;
     connect:Function;
+    sendSerial:Function;
   }
 }
 

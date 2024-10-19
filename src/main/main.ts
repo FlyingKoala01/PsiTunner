@@ -189,7 +189,7 @@ const createWindow = async () => {
     return { action: 'deny' };
   });
 
-  initializeSerialPort();
+  //initializeSerialPort();
   setInterval(sendSerialStatus, 3000);
   setInterval(sendConnectionStatus, 2000);
 

@@ -28,17 +28,16 @@ const Card: React.FC<CardProps> = ({ card, onCardSelect, onDragStart }) => {
     >
       <div
         style={{
-          backgroundColor: signalTypeColors[card.signal_type] || '#FFFFFF',
+          backgroundColor: card.color || '#FFFFFF',
           opacity: '0.1',
         }}
         className="absolute inset-0 rounded-lg"
       ></div>
       <div className="relative z-10">
-        <h3 className="font-bold">{card.sensor_name}</h3>
-        <p>{card.sensor_type}</p>
+        <h3 className="font-bold">{card.name}</h3>
         {card.description && <p>{card.description}</p>}
-        <p className="text-sm ">{card.type === 'input' ? 'Input' : 'Output'}</p>
-        {card.type === 'input' && <p className="text-sm">{card.signal_type}</p>}
+        <p className="text-sm ">{card.output_params.length > 0 ? 'Input' : 'Output'}</p>
+        <p className="text-sm"><em>{card.input_params.map((param) => param.name).join(',')}</em></p>
       </div>
     </div>
   );

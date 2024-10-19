@@ -15,20 +15,22 @@ const HomePage: React.FC = () => {
   const dragPosition = useDragPosition();
 
   const handleCardSelect = (card: CardType) => {
-    if (!selectedCards.find((c) => c.sensor_name === card.sensor_name)) {
+    if (!selectedCards.find((c) => c.name === card.name)) {
       setSelectedCards((prevSelectedCards) => [...prevSelectedCards, card]);
       setCards((prevCards) =>
-        prevCards.filter((c) => c.sensor_name !== card.sensor_name),
+        prevCards.filter((c) => c.name !== card.name),
       );
       setDraggingCard(null);
+      window.sendSerial('X' + card.serial_prefix);
     }
   };
 
   const handleCardRemove = (card: CardType) => {
     setSelectedCards((prevSelectedCards) =>
-      prevSelectedCards.filter((c) => c.sensor_name !== card.sensor_name),
+      prevSelectedCards.filter((c) => c.name !== card.name),
     );
     setCards((prevCards) => [...prevCards, card]);
+    window.sendSerial('Y' + card.serial_prefix);
   };
 
   const handleDragStart = (card: CardType) => {

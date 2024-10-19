@@ -9,11 +9,11 @@ interface DragPreviewProps {
 
 const DragPreview: React.FC<DragPreviewProps> = ({ card, position }) => {
   useEffect(() => {
-    console.log('POSITION: ', position);
+    //console.log('POSITION: ', position);
   }, [position]);
 
   return (
-    <div
+    /*<div
       className="fixed pointer-events-none"
       style={{
         top: `${position.y}px`,
@@ -25,18 +25,11 @@ const DragPreview: React.FC<DragPreviewProps> = ({ card, position }) => {
     >
       <div className="p-4 border rounded-lg shadow cursor-pointer relative">
         <div className="relative z-10">
-          <h3 className="font-bold">{card.sensor_name}</h3>
-          <p>{card.sensor_type}</p>
+          <h3 className="font-bold">{card.name}</h3>
           {card.description && <p>{card.description}</p>}
-          <p className="text-sm text-gray-500">
-            {card.type === 'input' ? 'Input' : 'Output'}
-          </p>
-          {card.type === 'input' && (
-            <p className="text-sm text-white">{card.signal_type}</p>
-          )}
         </div>
       </div>
-    </div>
+    </div>*/<></>
   );
 };
 

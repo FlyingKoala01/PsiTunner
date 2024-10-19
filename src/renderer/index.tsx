@@ -38,7 +38,7 @@ window.electron.ipcRenderer.on('serial-data', (data) => {
 });
 
 window.electron.ipcRenderer.on('send-serial-error', (command) => {
-  console.log('Serial on command:', command);
+  alert('Command was not sent successfully: ' + command);
 });
 
 console.log('Ready!');
