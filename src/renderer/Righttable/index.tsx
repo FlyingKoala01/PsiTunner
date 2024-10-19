@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CardType } from '../types';
+import { parse } from 'path';
 
 interface RightTableProps {
   selectedCards: CardType[];
@@ -10,14 +11,60 @@ const RightTable: React.FC<RightTableProps> = ({
   selectedCards,
   onCardRemove,
 }) => {
-  const [inputValues, setInputValues] = useState<{ [key: string]: string }>({});
+  const [inputValues, setInputValues] = useState<{ [key: string] : { [key: string]: string} }>({});
+  const [outputValues, setOutputValues] = useState<{ [key: string] : { [key: string]: string} }>({});
 
-  const handleInputChange = (sensor_name: string, value: string) => {
-    setInputValues((prevValues) => ({
+  const handleOutputChange = (card: CardType, param_name: string, value: string) => {
+    setOutputValues((prevValues) => ({
       ...prevValues,
-      [sensor_name]: value,
+      [card.name]: {
+        ...prevValues[card.name],
+        [param_name]: value.toString(),
+      }
     }));
+    let outputParams = card.output_params.map((param) => {
+      let param_value = parseFloat(outputValues?.[card.name]?.[param.name]);
+      if (param.name == param_name) param_value = parseFloat(value);
+      if (param.value_type == 'bool' || param.value_type == 'uint16_t') {
+        return Math.round(param_value);
+      }
+      else { // Float
+        return param_value.toFixed(param.precision_decimals);
+      }
+    }).join(',');
+    window.ApplicationConfig.last_output_params[card.serial_prefix] = outputParams;
+    window.sendSerial(card.serial_prefix + outputParams);
   };
+
+  useEffect(() => {
+    let i = setInterval(() => {
+      selectedCards.forEach( (card) => {
+        let last_measures = window.ApplicationConfig.last_measures[card.serial_prefix];
+
+        if (typeof last_measures === 'string') {
+          let split_measures = last_measures.split(',');
+          let parsed_values : {[key: string]: string} = {};
+
+          for (let i = 0; i<card.input_params.length; i++) {
+            if (split_measures.length <= i) break;
+            let value = split_measures[i];
+
+            if (card.input_params[i].value_type == 'bool') {
+              value = value=='1' ? 'True' : 'False';
+            }
+
+            parsed_values[card.input_params[i].name] = value;
+          }
+
+          setInputValues((prevValues) => ({
+            ...prevValues,
+            [card.name]: parsed_values,
+          }));
+        }
+      });
+    }, 200);
+    return () => {clearInterval(i)};
+  })
 
   const hexToRgb = (hex:string) => {
     let shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
@@ -59,24 +106,24 @@ const RightTable: React.FC<RightTableProps> = ({
             {card.description && <p>{card.description}</p>}
             <hr className="pb-2"/>
             {card.output_params.map((param) => (
-              <div className="flex" key={card.name + param.name}>
+              <div className="flex mb-2" key={card.name + '_out_' + param.name}>
                 <p className="pe-3">{param.name}:</p>
                 <input
                   type="text"
-                  className="mt-2 p-2 border rounded text-xs"
-                  value={inputValues[card.name] || ''}
+                  className="border rounded text-xs"
+                  value={outputValues?.[card.name]?.[param.name] || ''}
                   onChange={(e) =>
-                    handleInputChange(card.name, e.target.value)
+                    handleOutputChange(card, param.name, e.target.value)
                   }
                 />
-                <p className="pe-3">{param.units || param.name}</p>
+                <p className="ps-3">{param.units || param.name}</p>
               </div>
             ))}
             {card.output_params.length > 0 ? (<hr className="pb-2"/>) : ''}
             <div className="flex">
               {card.input_params.map((param) => (
-                <p className="mt-2 pe-3">
-                  {param.name}: <b>{inputValues[param.name] || 'N/A'}</b>
+                <p className="mt-2 pe-3" key={card.name + '_in_' + param.name}>
+                  {param.name}: <b>{inputValues?.[card.name]?.[param.name] || 'N/A'}</b>
                 </p>
               ))}
             </div>

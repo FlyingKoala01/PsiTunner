@@ -22,6 +22,10 @@ const HomePage: React.FC = () => {
       );
       setDraggingCard(null);
       window.sendSerial('X' + card.serial_prefix);
+      let last_output_params = window.ApplicationConfig.last_output_params[card.serial_prefix];
+      if (last_output_params) {
+        window.sendSerial(card.serial_prefix + last_output_params);
+      }
     }
   };
 

@@ -65,10 +65,39 @@ const connectToPath = (path:string) => {
     console.error('SerialPort error:', err);
   });
 
+  let data_buffer = new Uint8Array(1024);
+  let current_next_pos = 0;
+  
   port.on('data', (data: Buffer) => {
-    mainWindow?.webContents.send('serial-data', data);
-  })
+    // Ensure the new data will fit in the buffer
+    let new_data = new Uint8Array(data);
+    
+    if (current_next_pos + new_data.length <= data_buffer.length) {
+      data_buffer.set(new_data, current_next_pos); // Copy new data into the buffer
+      current_next_pos += new_data.length;
+  
+      let last_newline_pos;
+      while ((last_newline_pos = data_buffer.slice(0, current_next_pos).indexOf(10, 0)) !== -1) { // 10 is newline '\n'
+        let final_data = data_buffer.slice(0, last_newline_pos); // Take data up to '\n'
+  
+        // Check if the previous character is '\r' and remove it
+        if (final_data[final_data.length - 1] === 13) { // 13 is carriage return '\r'
+          final_data = final_data.slice(0, final_data.length - 1);
+        }
 
+        mainWindow?.webContents.send('serial-data', final_data);
+  
+        // Move the remaining data in the buffer to the start
+        let remaining_data = data_buffer.slice(last_newline_pos + 1, current_next_pos);
+
+        data_buffer.set(remaining_data, 0);
+        current_next_pos = remaining_data.length; // Update position for remaining data
+      }
+    } else {
+      console.error('Buffer overflow');
+    }
+  });  
+  
   return true;
 }
 
@@ -189,7 +218,7 @@ const createWindow = async () => {
     return { action: 'deny' };
   });
 
-  //initializeSerialPort();
+  initializeSerialPort();
   setInterval(sendSerialStatus, 3000);
   setInterval(sendConnectionStatus, 2000);
 

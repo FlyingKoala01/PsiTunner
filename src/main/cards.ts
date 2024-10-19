@@ -10,6 +10,7 @@ export const initialCards: CardType[] = [
       value_type: 'uint16_t',
       range_min: 0,
       range_max: 1000,
+      units: 'rpm',
       precision_decimals: 0
     }],
     input_params: [
@@ -18,6 +19,7 @@ export const initialCards: CardType[] = [
         value_type: 'uint16_t',
         range_min: 0,
         range_max: 1000,
+        units: 'rpm',
         precision_decimals: 0,
       },
       {

@@ -3,30 +3,37 @@ import React, { useEffect, useState } from 'react';
 
 const SerialStatus: React.FC = () => {
   const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [connectionChange, setConnectionChange] = useState<boolean>(false);
   const [deviceList, setDeviceList] = useState<Array<string>>([]);
-  const [chosenDevice, setChosenDevice] = useState<string>('');
+  const [chosenDevice, setChosenDevice] = useState<string | null>(null);
 
   useEffect(() => {
     let i = setInterval(() => {
+      if (chosenDevice === null && window.ApplicationConfig.current_serial_device) {
+        setChosenDevice(window.ApplicationConfig.current_serial_device);
+      }
       setDeviceList(window.ApplicationConfig.available_serial_devices);
-      setIsConnected(chosenDevice != '' && window.ApplicationConfig.current_serial_device == chosenDevice)
-    }, 500);
+      if (window.ApplicationConfig.current_serial_device == chosenDevice) {
+        setConnectionChange(false);
+      }
+      setIsConnected(!!window.ApplicationConfig.current_serial_device && !connectionChange);
+    }, 200);
     return () => clearInterval(i);
   })
 
   function clickedDevice(event:any) {
     let device:string = event?.target.value;
     setChosenDevice(device);
+    setConnectionChange(true);
     setIsConnected(false);
     window.connect(device);
-    console.log('aaa');
   }
 
   return (
     <div className='flex flex-row'>
       <h2>Device</h2>
-      <select onChange={clickedDevice}>
-        <option value=""></option>
+      <select onChange={clickedDevice} value={chosenDevice || ''}>
+      <option value=""></option>
         {deviceList.map((device) => (
           <option key={device} value={device}>
             {device}
